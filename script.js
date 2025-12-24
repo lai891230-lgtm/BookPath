@@ -54,11 +54,28 @@ const App = {
         linkElement.click();
     },
 
-    triggerImport() {
-        document.getElementById('import-file').click();
+    openImportModal() {
+        const modalContent = document.getElementById('book-detail-content');
+        if (!modalContent) return;
+
+        modalContent.innerHTML = `
+            <h2>匯入備份</h2>
+            <div style="margin-top:1rem;">
+                <p style="color:#cbd5e1; margin-bottom:1.5rem;">請選擇您的 .json 備份檔案 (將合併至現有資料)：</p>
+                
+                <div style="background:rgba(255,255,255,0.05); padding:2rem; border-radius:16px; text-align:center; border: 2px dashed rgba(255,255,255,0.1);">
+                    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 3rem; color: #38bdf8; margin-bottom: 1rem;"></i>
+                    <button class="btn-primary" style="width:100%; padding: 1rem;" onclick="document.getElementById('import-file').click()">
+                        選擇檔案匯入
+                    </button>
+                    <p style="font-size:0.8rem; color:#64748b; margin-top:1rem;">支援電腦與手機備份檔</p>
+                </div>
+            </div>
+        `;
+        this.openModal('viewBookModal');
     },
 
-    handleImport(event) {
+    handleFileImport(event) {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -66,36 +83,43 @@ const App = {
         reader.onload = (e) => {
             try {
                 const importedBooks = JSON.parse(e.target.result);
-                if (Array.isArray(importedBooks)) {
-                    if (confirm(`準備匯入 ${importedBooks.length} 本書。\n目前有 ${this.state.books.length} 本書。\n\n點擊「確定」將合併這些書籍 (保留現有資料)。`)) {
-                        // Merge and deduplicate by ID
-                        const existingIds = new Set(this.state.books.map(b => b.id));
-                        let addedCount = 0;
-
-                        importedBooks.forEach(b => {
-                            if (!existingIds.has(b.id)) {
-                                this.state.books.push(b);
-                                existingIds.add(b.id);
-                                addedCount++;
-                            }
-                        });
-
-                        this.saveData();
-                        this.showToast(`✅ 匯入成功！新增了 ${addedCount} 本書`);
-                        this.navigateTo('dashboard');
-
-                        // Clean up file input
-                        event.target.value = '';
-                    }
-                } else {
-                    alert('匯入的檔案格式錯誤 (不是陣列)');
-                }
+                this.processImportData(importedBooks);
             } catch (err) {
                 console.error(err);
                 alert('無法讀取檔案，請確認是正確的 JSON 備份檔');
             }
         };
         reader.readAsText(file);
+        event.target.value = ''; // Reset input
+    },
+
+    processImportData(importedBooks) {
+        if (!Array.isArray(importedBooks)) {
+            alert('匯入的資料格式錯誤 (必須是陣列)');
+            return;
+        }
+
+        if (confirm(`準備匯入 ${importedBooks.length} 本書。\n目前有 ${this.state.books.length} 本書。\n\n點擊「確定」將合併這些書籍。`)) {
+            // Merge and deduplicate by ID
+            const existingIds = new Set(this.state.books.map(b => b.id));
+            let addedCount = 0;
+
+            importedBooks.forEach(b => {
+                if (!existingIds.has(b.id)) {
+                    this.state.books.push(b);
+                    existingIds.add(b.id);
+                    addedCount++;
+                }
+            });
+
+            this.saveData();
+            this.closeModal('viewBookModal');
+            this.showToast(`✅ 匯入成功！新增了 ${addedCount} 本書`);
+
+            // Refresh view
+            if (this.state.currentView === 'library') this.renderLibrary(document.getElementById('view-container'));
+            else this.navigateTo('library');
+        }
     },
 
     saveData() {
@@ -329,21 +353,19 @@ const App = {
     renderDashboard(container) {
         const totalBooks = this.state.books.length;
         const totalTags = new Set(this.state.books.flatMap(b => b.tags)).size;
-        const recentRead = this.state.books[0]?.title || "尚無資料";
 
         container.innerHTML = `
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <span class="stat-label">書籍</span>
-                    <span class="stat-value">${totalBooks}</span>
+            <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                <!-- Stat Card: Books -->
+                <div class="stat-card glass-panel fade-in" style="padding: 1.2rem; border-radius: 16px; background: rgba(30, 41, 59, 0.6); display: flex; flex-direction: column; align-items: start;">
+                    <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem;">書籍收藏</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: #38bdf8; line-height: 1;">${totalBooks}</div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label">主題</span>
-                    <span class="stat-value">${totalTags}</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label">最近</span>
-                    <span class="stat-value" style="font-size: 1.5rem; line-height: 3rem;">${recentRead}</span>
+
+                <!-- Stat Card: Topics -->
+                <div class="stat-card glass-panel fade-in" style="padding: 1.2rem; border-radius: 16px; background: rgba(30, 41, 59, 0.6); display: flex; flex-direction: column; align-items: start;">
+                    <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem;">主題領域</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: #818cf8; line-height: 1;">${totalTags}</div>
                 </div>
             </div>
 
@@ -444,7 +466,7 @@ const App = {
                     <button class="btn-secondary" onclick="App.exportBackup()" title="匯出備份" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer;">
                         <i class="fa-solid fa-download"></i> 匯出
                     </button>
-                    <button class="btn-secondary" onclick="App.triggerImport()" title="匯入備份" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer;">
+                    <button class="btn-secondary" onclick="App.openImportModal()" title="匯入備份" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer;">
                         <i class="fa-solid fa-upload"></i> 匯入
                     </button>
                 </div>

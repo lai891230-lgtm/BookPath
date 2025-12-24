@@ -59,9 +59,7 @@
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text" id="global-search" placeholder="搜尋書籍、筆記或標籤..." oninput="App.handleSearch(event)">
                 </div>
-                <div class="user-profile">
-                    <div class="avatar">L</div>
-                </div>
+
             </header>
 
             <!-- Dynamic Views -->
@@ -129,7 +127,7 @@
     <!-- Settings Modal Removed -->
 
     <!-- Hidden File Input for Import -->
-    <input type="file" id="import-file" style="display: none" onchange="App.handleImport(event)" accept=".json">
+    <input type="file" id="import-file" style="display: none" onchange="App.handleFileImport(event)" accept=".json">
 
     <!-- Service Worker Registration for PWA -->
     <script>
