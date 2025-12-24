@@ -460,13 +460,13 @@ const App = {
         }
 
         const headerHtml = `
-            <div class="library-header fade-in" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div class="library-header fade-in" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
                 <h2 style="margin: 0;">所有書籍 (${books.length})</h2>
-                <div class="library-actions" style="display: flex; gap: 0.5rem;">
-                    <button class="btn-secondary" onclick="App.exportBackup()" title="匯出備份" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer;">
+                <div class="library-actions" style="display: flex; gap: 0.5rem; width: 100%;">
+                    <button class="btn-secondary" onclick="App.exportBackup()" title="匯出備份" style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         <i class="fa-solid fa-download"></i> 匯出
                     </button>
-                    <button class="btn-secondary" onclick="App.openImportModal()" title="匯入備份" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer;">
+                    <button class="btn-secondary" onclick="App.openImportModal()" title="匯入備份" style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         <i class="fa-solid fa-upload"></i> 匯入
                     </button>
                 </div>
@@ -486,6 +486,7 @@ const App = {
     },
 
     renderTopics(container) {
+        // ... (Topic rendering logic remains same if not touched, but need to respect ReplacmentContent boundaries) ...
         const tagMap = {};
         this.state.books.forEach(book => {
             book.tags.forEach(tag => {
@@ -514,7 +515,8 @@ const App = {
                 <div class="book-tags">
                     ${book.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
                 </div>
-                <p style="font-size: 0.9rem; color: #cbd5e1; margin-top: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                <!-- Line clamp removed for full text display -->
+                <p style="font-size: 0.9rem; color: #cbd5e1; margin-top: 1rem; line-height: 1.6;">
                     ${book.summary}
                 </p>
             </div>

@@ -95,8 +95,6 @@
         <div class="modal-content glass-panel">
             <span class="close-modal" onclick="App.closeModal('addBookModal')">&times;</span>
             <h2>新增書籍心得</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">只需輸入書名與心得，AI 將自動為您標記重點。
-            </p>
             <form id="addBookForm" onsubmit="App.handleAddBook(event)">
                 <div class="form-group">
                     <label>書名</label>
@@ -104,7 +102,7 @@
                 </div>
                 <!-- Author, Tags, Summary removed for simplification -->
                 <div class="form-group">
-                    <label>詳細心得 (試著寫下你的反思，系統會自動分析)</label>
+                    <label>心得</label>
                     <textarea name="review" rows="8" placeholder="在這本書中，我學到了..." required></textarea>
                 </div>
                 <button type="submit" class="btn-primary">
