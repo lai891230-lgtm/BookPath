@@ -22,34 +22,7 @@
 <body>
 
     <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <nav class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-book-open-reader"></i>
-                <span>BookPath</span>
-            </div>
 
-            <ul class="nav-links">
-                <li class="active" onclick="App.navigateTo('dashboard')">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span>儀表板</span>
-                </li>
-                <li onclick="App.navigateTo('library')">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <span>我的書庫</span>
-                </li>
-                <li onclick="App.navigateTo('topics')">
-                    <i class="fa-solid fa-hashtag"></i>
-                    <span>主題彙整</span>
-                </li>
-            </ul>
-
-            <div class="nav-footer">
-                <button class="btn-add-book" onclick="App.openModal('addBookModal')">
-                    <i class="fa-solid fa-plus"></i> 新增書籍
-                </button>
-            </div>
-        </nav>
 
         <!-- Main Content Area -->
         <main class="main-content">

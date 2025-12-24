@@ -10,8 +10,6 @@ const App = {
 
     init() {
         this.loadData();
-        // Strict Sync to ensure correct order and count (16 books)
-        this.syncDefinedBooks();
         // Initial route
         this.navigateTo('dashboard');
     },
@@ -25,16 +23,7 @@ const App = {
         }
     },
 
-    syncDefinedBooks() {
-        // Only inject if the library is empty (Restore default behavior)
-        if (this.state.books && this.state.books.length > 0) {
-            return;
-        }
 
-        // Previously used for core library injection. 
-        // Now kept as a placeholder structure for future default data logic.
-        this.saveData();
-    },
 
 
 
