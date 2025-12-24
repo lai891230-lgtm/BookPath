@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookPath - 你的閱讀知識庫</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- WordCloud2.js (Corrected CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>BookPath</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="active" onclick="App.navigateTo('dashboard')">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>儀表板</span>
+                </li>
+                <li onclick="App.navigateTo('library')">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>我的書庫</span>
+                </li>
+                <li onclick="App.navigateTo('topics')">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <span>主題彙整</span>
+                </li>
+            </ul>
+
+            <div class="nav-footer">
+                <button class="btn-add-book" onclick="App.openModal('addBookModal')">
+                    <i class="fa-solid fa-plus"></i> 新增書籍
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 id="page-title">儀表板</h1>
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="global-search" placeholder="搜尋書籍、筆記或標籤..." oninput="App.handleSearch(event)">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">L</div>
+                </div>
+            </header>
+
+            <!-- Dynamic Views -->
+            <div id="view-container" class="view-container">
+                <!-- Views will be injected here by JS -->
+            </div>
+        </main>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="App.navigateTo('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>儀表板</span>
+            </div>
+            <div class="nav-item" onclick="App.navigateTo('library')">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>書庫</span>
+            </div>
+            <div class="nav-item" onclick="App.navigateTo('topics')">
+                <i class="fa-solid fa-hashtag"></i>
+                <span>主題</span>
+            </div>
+        </nav>
+
+        <!-- Mobile FAB -->
+        <button class="fab-add" onclick="App.openModal('addBookModal')">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Modals -->
+    <div id="addBookModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" onclick="App.closeModal('addBookModal')">&times;</span>
+            <h2>新增書籍心得</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">只需輸入書名與心得，AI 將自動為您標記重點。
+            </p>
+            <form id="addBookForm" onsubmit="App.handleAddBook(event)">
+                <div class="form-group">
+                    <label>書名</label>
+                    <input type="text" name="title" required placeholder="例如：原子習慣">
+                </div>
+                <!-- Author, Tags, Summary removed for simplification -->
+                <div class="form-group">
+                    <label>詳細心得 (試著寫下你的反思，系統會自動分析)</label>
+                    <textarea name="review" rows="8" placeholder="在這本書中，我學到了..." required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 智慧儲存
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Book Modal -->
+    <div id="viewBookModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" onclick="App.closeModal('viewBookModal')">&times;</span>
+            <div id="book-detail-content">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal Removed -->
+
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="import-file" style="display: none" onchange="App.handleImport(event)" accept=".json">
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered!', reg))
+                    .catch(err => console.log('SW Failed:', err));
+            });
+        }
+    </script>
+    <script src="script.js?v=3"></script>
+</body>
+
+</html>
