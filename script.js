@@ -2,16 +2,59 @@ const App = {
     state: {
         books: [],
         currentView: 'dashboard',
-        books: [],
-        currentView: 'dashboard',
         searchQuery: '',
-        apiKey: 'AIzaSyBw8Szt7WDMwPQeWAqW1zDuyvilANk9kfY'
+        apiKey: localStorage.getItem('bookpath_apikey') || ''
     },
 
     init() {
         this.loadData();
+        // Check for API key
+        if (!this.state.apiKey) {
+            setTimeout(() => {
+                this.showToast('⚠️ 請先設定 Gemini API Key 才能使用 AI 功能');
+            }, 1000);
+        }
         // Initial route
         this.navigateTo('dashboard');
+    },
+
+    // --- Settings ---
+    openSettingsModal() {
+        const content = document.getElementById('book-detail-content');
+        content.innerHTML = `
+            <h2>設定</h2>
+            <form onsubmit="App.saveSettings(event)">
+                <div class="form-group">
+                    <label>Gemini API Key</label>
+                    <input type="password" name="apiKey" value="${this.state.apiKey}" placeholder="貼上您的 API Key" required>
+                    <p style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;">
+                        您的 Key 只會儲存在此裝置上，不會上傳到伺服器。<br>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#38bdf8;">👉 點此申請免費 Key</a>
+                    </p>
+                </div>
+                <button type="submit" class="btn-primary">儲存設定</button>
+            </form>
+            <div style="margin-top: 2rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                <button onclick="App.exportBackup()" class="btn-secondary" style="width:100%; padding:1rem; margin-bottom:1rem; background:rgba(255,255,255,0.05); color:white; border:none; border-radius:12px;">
+                    <i class="fa-solid fa-download"></i> 下載完整備份
+                </button>
+                <div style="text-align:center; font-size:0.8rem; color:#475569;">version 2.2</div>
+            </div>
+        `;
+        this.openModal('viewBookModal');
+    },
+
+    saveSettings(event) {
+        event.preventDefault();
+        const form = event.target;
+        const newKey = form.apiKey.value.trim();
+
+        if (newKey) {
+            this.state.apiKey = newKey;
+            localStorage.setItem('bookpath_apikey', newKey);
+            this.showToast('✅ 設定已儲存');
+            this.closeModal('viewBookModal');
+        }
     },
 
     loadData() {
@@ -201,17 +244,25 @@ const App = {
                     const existingTags = [...new Set(this.state.books.flatMap(b => b.tags))];
 
                     // Standard AI Call with existing tags context
-                    const result = await this.callGemini(title, review, "gemini-2.0-flash", existingTags);
+                    const result = await this.callGemini(title, review, "gemini-2.5-flash", existingTags);
                     generatedTags = result.tags;
                     summary = result.summary;
                 } catch (geminiError) {
                     console.error("Gemini Error:", geminiError);
-                    alert(`AI 連線失敗: ${geminiError.message}`);
-                    throw geminiError;
+                    if (geminiError.message.includes('403') || geminiError.message.includes('key')) {
+                        if (confirm('API Key 可能已失效或未設定。是否現在去設定？')) {
+                            this.openSettingsModal();
+                            return; // Stop saving, let user fix key first
+                        }
+                    }
+                    // Fallback: Proceed to save without AI
+                    if (!confirm('AI 分析失敗，是否仍要儲存書籍 (將不包含標籤與摘要)？')) return;
                 }
             } else {
-                alert("錯誤：未檢測到 API Key！");
-                return;
+                if (confirm("尚未設定 AI API Key。要去設定嗎？\n(取消將僅儲存文字，無 AI 分析)")) {
+                    this.openSettingsModal();
+                    return;
+                }
             }
 
             const newBook = {
