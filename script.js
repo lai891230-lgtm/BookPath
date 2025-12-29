@@ -201,7 +201,7 @@ const App = {
                     const existingTags = [...new Set(this.state.books.flatMap(b => b.tags))];
 
                     // Standard AI Call with existing tags context
-                    const result = await this.callGemini(title, review, "gemini-2.5-flash", existingTags);
+                    const result = await this.callGemini(title, review, "gemini-2.0-flash", existingTags);
                     generatedTags = result.tags;
                     summary = result.summary;
                 } catch (geminiError) {
@@ -249,7 +249,7 @@ const App = {
         }
     },
 
-    async callGemini(title, review, model = "gemini-2.5-flash", existingTags = []) {
+    async callGemini(title, review, model = "gemini-2.0-flash", existingTags = []) {
         const CORE_TAGS = ["經濟", "社會", "思維", "趨勢", "歷史", "政治", "制度", "傳記", "商業", "管理", "談判", "心理", "財富", "哲學", "自我成長", "人類學", "教育", "思考", "投資", "職場", "科技"];
 
         // Combine core tags with user's specific tags, removing duplicates
